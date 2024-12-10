@@ -1,29 +1,35 @@
 <script lang="ts">
-  import Progress from "./Progress.svelte";
+  import { showFilter } from "./stores";
   export let path;
 </script>
 
 {#key path}
-  <img 
-  src={`https://image.tmdb.org/t/p/original${path}`} 
-  alt="Celebrity Portrait">
+  <img
+    class={$showFilter ? "filtered" : "unfiltered"}
+    src={`https://image.tmdb.org/t/p/original${path}`}
+    alt="Celebrity Portrait"
+  />
 {/key}
-  <Progress />
 
 <style>
-  img {
+  .filtered {
     width: 100%;
-    height: 100%;
-    object-fit: contain;
-    animation: fade 1s ease-out;
+    object-fit: cover;
+    animation: portraitAppear 12s forwards;
   }
 
-  @keyframes fade {
+  .unfiltered {
+    width: 100%;
+    object-fit: cover;
+    animation: portraitAppear 0.1s forwards;
+  }
+
+  @keyframes portraitAppear {
     0% {
-      opacity: 0.1;
-    } 
+      filter: blur(30px);
+    }
     100% {
-      opacity: 1
+      filter: blur(0);
     }
   }
 </style>

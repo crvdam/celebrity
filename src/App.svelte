@@ -1,99 +1,102 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import Portrait from "./lib/Portrait.svelte";
-  import PortraitFilter from "./lib/PortraitFilter.svelte";
   import Options from "./lib/Options.svelte";
-  import Footer from "./lib/Footer.svelte";
+  import CurrentScore from "./lib/CurrentScore.svelte";
   import StartScreen from "./lib/StartScreen.svelte";
-  import HighscoreScreen from "./lib/HighscoreScreen.svelte";
-  import { fetchCelebrities, randomInt, startTimer, stopTimer } from "./lib/utils";
-  import { celebrities, score, showFilter, timer } from "./lib/stores";
+  import EndScreen from "./lib/EndScreen.svelte";
+  import {
+    fetchCelebrities,
+    randomInt,
+    startTimer,
+    stopTimer,
+  } from "./lib/utils";
+  import { celebrities, score, timer } from "./lib/stores";
+  import ProgressBar from "./lib/ProgressBar.svelte";
 
   let pageNumber = 1;
 
   onMount(() => {
-    // API GET request for 20 celebrities
     fetchCelebrities(pageNumber);
   });
 
   let highscoreScreen = false;
   let startGame = false;
-  let numberOfItems = 10;
-  let celebrity:any;
- 
-  // This is called when an option is selected or the timer runs out.
-  function nextItem() {
-      stopTimer();
-      timer.set(0)
+  let numberOfPortraits = 10;
+  let randomCelebrity: any;
 
-    if (numberOfItems < 1) {
-      // Game ends, fetch the next 20 celebrities
+  function nextFace() {
+    stopTimer();
+    timer.set(0);
+
+    if (numberOfPortraits < 1) {
       pageNumber++;
       fetchCelebrities(pageNumber);
 
       startGame = false;
       highscoreScreen = true;
-      numberOfItems = 10;
-
+      numberOfPortraits = 10;
     } else {
-      // Get a random celebrity from the store and remove that celebrity from store.
-      celebrity = $celebrities.splice(randomInt($celebrities.length), 1);
-      celebrity = new Object(...celebrity)
+      randomCelebrity = $celebrities.splice(randomInt($celebrities.length), 1);
+      randomCelebrity = new Object(...randomCelebrity);
 
-      numberOfItems--;
-      startTimer();    
+      numberOfPortraits--;
+      startTimer();
     }
   }
 
   function handleStartGame() {
     score.set(0);
-    nextItem();
+    nextFace();
     startGame = true;
   }
 
-  $: if($timer > 20000) {
-    nextItem();
+  $: if ($timer > 10000) {
+    nextFace();
   }
-
 </script>
 
 <main>
   {#if startGame}
-    <div class="container-portrait">
-      <Portrait path={celebrity.profile_path}/>
-      {#if $showFilter}
-        <PortraitFilter />
-      {/if}
+    <div class="main__portrait">
+      <Portrait path={randomCelebrity.profile_path} />
     </div>
-    <Options name={celebrity.name} on:next={nextItem}/>
-    <Footer />
+
+    <ProgressBar />
+
+    <div class="main__options">
+      <Options correctName={randomCelebrity.name} on:next={nextFace} />
+    </div>
+
+    <div class="main__score">
+      <CurrentScore />
+    </div>
   {:else if highscoreScreen}
-    <HighscoreScreen on:back={() => highscoreScreen = false} />
+    <EndScreen on:back={() => (highscoreScreen = false)} />
   {:else}
-    <StartScreen on:start={handleStartGame}/>
+    <StartScreen on:start={handleStartGame} />
   {/if}
 </main>
 
 <style>
   main {
-    width: 100vw;
-    height: 100vh;
     display: flex;
+    margin: auto;
     flex-direction: column;
     align-items: center;
-    margin: auto;
+    width: 320px;
   }
 
-  .container-portrait {
+  .main__options {
     width: 100%;
-    height: 75%;
-    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 0.5rem;
+    margin-top: 1rem;
   }
 
-  @media screen and (min-width: 600px) {
-    main {
-      width: 600px;
-    }
+  .main__score {
+    margin-top: 2rem;
   }
-
 </style>

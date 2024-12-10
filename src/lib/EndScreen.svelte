@@ -7,28 +7,26 @@
   const highscore = Number(localStorage.getItem("highscore"));
 
   if ($score > highscore) {
-    localStorage.setItem("highscore", $score.toString())
+    localStorage.setItem("highscore", $score.toString());
   }
-
 </script>
 
 <div class="highscore-screen">
   <h1>Your score: {$score.toFixed(0)}</h1>
-  <button on:click={() => dispatch('back')}>Back</button>
+  <button class="neutral-button" on:click={() => dispatch("back")}>Back</button>
   {#if $score > highscore}
     <h2>New highscore!</h2>
   {:else}
     <h2>Highscore: {highscore.toFixed(0)}</h2>
   {/if}
-  
 </div>
 
 <style>
-   div {
+  .highscore-screen {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    margin-top: 40%;
+    gap: 2rem;
+    margin-top: 20rem;
   }
 
   button {
@@ -40,6 +38,7 @@
   }
 
   h2 {
+    text-align: center;
     font-size: 2rem;
     margin-top: 2rem;
   }

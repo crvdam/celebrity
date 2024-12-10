@@ -1,68 +1,63 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  import { celebrities, score, showFilter, timer } from "./stores";
+  import { celebrities, score, timer, showFilter } from "./stores";
   import { randomInt, stopTimer } from "./utils";
 
   const dispatch = createEventDispatcher();
 
-  export let name:string;
+  export let correctName: string;
 
-  let nameArray:Array<string> = [];
-  
-  // Populates an array with 3 invalid names taken randomly from the celebrities store.
-  // The correct name is randomly inserted into the array.
-  $: if(name){
-    nameArray = [];
-    while (nameArray.length < 3) {
+  let namesArray: Array<string> = [];
+
+  $: if (correctName) {
+    namesArray = [];
+    while (namesArray.length < 3) {
       const invalidName = $celebrities[randomInt($celebrities.length)].name;
-  
-      if (!nameArray.includes(invalidName)) {
-        nameArray.push(invalidName);
+
+      if (!namesArray.includes(invalidName)) {
+        namesArray.push(invalidName);
       }
     }
-    nameArray.splice(randomInt(4), 0, name);
+    namesArray.splice(randomInt(4), 0, correctName);
   }
-  
+
   let buttonsDisabled = false;
 
-  // Check if selection is correct, disable the filter, move to next photo
-  function handleClick(e:any) {
+  function handleClick(e: any) {
+    showFilter.set(false);
     buttonsDisabled = true;
-    if (e.target.innerHTML === name) {
-      score.update((n) => n + ((20000 - $timer) / 100));
+    e.target.classList.remove("neutral-button");
+    if (e.target.innerHTML === correctName) {
+      score.update((n) => n + (20000 - $timer) / 100);
+      e.target.classList.add("correct-button");
+    } else {
+      e.target.classList.add("incorrect-button");
     }
 
     stopTimer();
-    showFilter.set(false);
 
     setTimeout(() => {
+      e.target.classList.add("neutral-button");
+      e.target.classList.remove("incorrect-button");
+      e.target.classList.remove("correct-button");
+      dispatch("next");
       showFilter.set(true);
-      dispatch('next')
       buttonsDisabled = false;
-    }, 1000);
+    }, 2000);
   }
-
 </script>
 
-<div class="wrapper">
-  {#each nameArray as name}
-    <button disabled={buttonsDisabled} on:click={handleClick}>{name}</button>
-  {/each}
-
-</div>
+{#each namesArray as name}
+  <button
+    class="neutral-button"
+    disabled={buttonsDisabled}
+    on:click={handleClick}>{name}</button
+  >
+{/each}
 
 <style>
-  .wrapper {
-    display: grid;
-    width: 100%;
-    height: 20%;
-    grid-template-columns: 1fr 1fr;
-  }
-
   button {
-    margin: 1rem;
-    font-size: 1.2em;
-    font-weight: 500;
+    font-weight: 600;
+    min-height: 4rem;
   }
-
 </style>
