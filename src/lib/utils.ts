@@ -1,26 +1,14 @@
 import { celebrities, timer } from "./stores";
 
-// The Movie Database (TMDB) API themoviedb.org
-export async function fetchCelebrities(page:number) {
-  celebrities.subscribe(value => {
-    const array = value;
-  })
-
-  const url = `https://api.themoviedb.org/3/person/popular?language=en-US&page=${page}`;
-  const options = {
-    method: 'GET',
-    headers: {
-      accept: 'application/json',
-      Authorization: ''
-    }
-  };
+export async function fetchCelebrities(page: number) {
+  try {
+    const response = await fetch(`/.netlify/functions/fetch-celebrities?page=${page}`);
+    const json = await response.json();
     
-  fetch(url, options)
-    .then(res => res.json())
-    .then(json => {
-      celebrities.set(json.results);
-    })
-    .catch(err => console.error('error:' + err));
+    celebrities.set(json.results);
+  } catch (err) {
+    console.error('error:' + err);
+  }
 }
 
 export function randomInt(max:number) {

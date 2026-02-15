@@ -85,6 +85,7 @@
     flex-direction: column;
     align-items: center;
     width: 320px;
+    padding-top: 4rem;
   }
 
   .main__options {
