@@ -100,4 +100,8 @@
   .main__score {
     margin-top: 2rem;
   }
+
+  .main__portrait {
+    height: 480px;
+  }
 </style>
